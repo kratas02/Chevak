@@ -1,0 +1,6 @@
+C:\Projects\ASOLExtension\obj\Debug\ASOLExtension.csproj.AssemblyReference.cache
+C:\Projects\ASOLExtension\obj\Debug\ASOLExtension.csproj.CoreCompileInputs.cache
+C:\Program Files\Microsoft Forefront Identity Manager\2010\Synchronization Service\Extensions\ASOLExtension.dll
+C:\Program Files\Microsoft Forefront Identity Manager\2010\Synchronization Service\Extensions\ASOLExtension.pdb
+C:\Projects\ASOLExtension\obj\Debug\ASOLExtension.dll
+C:\Projects\ASOLExtension\obj\Debug\ASOLExtension.pdb

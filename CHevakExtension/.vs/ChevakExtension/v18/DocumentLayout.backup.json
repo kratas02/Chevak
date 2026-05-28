@@ -1,0 +1,68 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Projects\\CHevakExtension\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{BFC63C2F-DC68-4865-B1F3-8A25DA32596F}|ChevakExtension.csproj|c:\\projects\\chevakextension\\chevakextension.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BFC63C2F-DC68-4865-B1F3-8A25DA32596F}|ChevakExtension.csproj|solutionrelative:chevakextension.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BFC63C2F-DC68-4865-B1F3-8A25DA32596F}|ChevakExtension.csproj|C:\\Projects\\CHevakExtension\\rulesextension.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BFC63C2F-DC68-4865-B1F3-8A25DA32596F}|ChevakExtension.csproj|solutionrelative:rulesextension.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{00000000-0000-0000-0000-000000000000}|\u003CSolution\u003E|ChevakExtension||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 2,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "RulesExtension.cs",
+              "DocumentMoniker": "C:\\Projects\\CHevakExtension\\RulesExtension.cs",
+              "RelativeDocumentMoniker": "RulesExtension.cs",
+              "ToolTip": "C:\\Projects\\CHevakExtension\\RulesExtension.cs",
+              "RelativeToolTip": "RulesExtension.cs",
+              "ViewState": "AgIAAEwAAAAAAAAAAAD4v28AAAAaAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-14T07:06:14.625Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "ChevakExtension",
+              "DocumentMoniker": "C:\\Projects\\CHevakExtension\\ChevakExtension.csproj",
+              "RelativeDocumentMoniker": "ChevakExtension.csproj",
+              "ToolTip": "C:\\Projects\\CHevakExtension\\ChevakExtension.csproj",
+              "RelativeToolTip": "ChevakExtension.csproj",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-03-19T18:31:52.154Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "ChevakExtension.cs",
+              "DocumentMoniker": "C:\\Projects\\CHevakExtension\\ChevakExtension.cs",
+              "RelativeDocumentMoniker": "ChevakExtension.cs",
+              "ToolTip": "C:\\Projects\\CHevakExtension\\ChevakExtension.cs",
+              "RelativeToolTip": "ChevakExtension.cs",
+              "ViewState": "AgIAAFcAAAAAAAAAAEAtwDIAAAAbAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-19T18:25:32.844Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

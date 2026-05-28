@@ -1,0 +1,58 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Projects\\ASOLExtension\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{BFC63C2F-DC68-4865-B1F3-8A25DA32596F}|ASOLExtension.csproj|c:\\projects\\asolextension\\asolextension.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BFC63C2F-DC68-4865-B1F3-8A25DA32596F}|ASOLExtension.csproj|solutionrelative:asolextension.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BFC63C2F-DC68-4865-B1F3-8A25DA32596F}|ASOLExtension.csproj|c:\\projects\\asolextension\\rulesextension.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BFC63C2F-DC68-4865-B1F3-8A25DA32596F}|ASOLExtension.csproj|solutionrelative:rulesextension.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "ASOLExtension.cs",
+              "DocumentMoniker": "C:\\Projects\\ASOLExtension\\ASOLExtension.cs",
+              "RelativeDocumentMoniker": "ASOLExtension.cs",
+              "ToolTip": "C:\\Projects\\ASOLExtension\\ASOLExtension.cs*",
+              "RelativeToolTip": "ASOLExtension.cs*",
+              "ViewState": "AgIAAGcAAAAAAAAAAAAWwHYAAAAeAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-16T18:22:11.967Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "RulesExtension.cs",
+              "DocumentMoniker": "C:\\Projects\\ASOLExtension\\RulesExtension.cs",
+              "RelativeDocumentMoniker": "RulesExtension.cs",
+              "ToolTip": "C:\\Projects\\ASOLExtension\\RulesExtension.cs",
+              "RelativeToolTip": "RulesExtension.cs",
+              "ViewState": "AgIAAIUAAAAAAAAAAAAmwJcAAABDAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-16T18:22:09.013Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{269a02dc-6af8-11d3-bdc4-00c04f688e50}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

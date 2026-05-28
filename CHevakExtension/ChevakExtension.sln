@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.4.11612.150 stable
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChevakExtension", "ChevakExtension.csproj", "{BFC63C2F-DC68-4865-B1F3-8A25DA32596F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BFC63C2F-DC68-4865-B1F3-8A25DA32596F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFC63C2F-DC68-4865-B1F3-8A25DA32596F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFC63C2F-DC68-4865-B1F3-8A25DA32596F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFC63C2F-DC68-4865-B1F3-8A25DA32596F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4D1AB588-6B2B-48C1-B296-0DE35F36E60B}
+	EndGlobalSection
+EndGlobal

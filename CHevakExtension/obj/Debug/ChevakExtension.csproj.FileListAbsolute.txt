@@ -1,0 +1,6 @@
+C:\Program Files\Microsoft Forefront Identity Manager\2010\Synchronization Service\Extensions\ChevakExtension.dll
+C:\Program Files\Microsoft Forefront Identity Manager\2010\Synchronization Service\Extensions\ChevakExtension.pdb
+C:\Projects\CHevakExtension\obj\Debug\ChevakExtension.csproj.AssemblyReference.cache
+C:\Projects\CHevakExtension\obj\Debug\ChevakExtension.csproj.CoreCompileInputs.cache
+C:\Projects\CHevakExtension\obj\Debug\ChevakExtension.dll
+C:\Projects\CHevakExtension\obj\Debug\ChevakExtension.pdb
