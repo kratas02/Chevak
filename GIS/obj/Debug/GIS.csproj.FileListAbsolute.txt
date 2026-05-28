@@ -1,0 +1,11 @@
+C:\Projects\Chevak\GIS\obj\Debug\GIS.csprojResolveAssemblyReference.cache
+C:\Projects\Chevak\GIS\bin\Debug\GIS.dll
+C:\Projects\Chevak\GIS\bin\Debug\GIS.pdb
+C:\Projects\Chevak\GIS\bin\Debug\mscorlib.dll
+C:\Projects\Chevak\GIS\bin\Debug\normidna.nlp
+C:\Projects\Chevak\GIS\bin\Debug\normnfc.nlp
+C:\Projects\Chevak\GIS\bin\Debug\normnfd.nlp
+C:\Projects\Chevak\GIS\bin\Debug\normnfkc.nlp
+C:\Projects\Chevak\GIS\bin\Debug\normnfkd.nlp
+C:\Projects\Chevak\GIS\obj\Debug\GIS.dll
+C:\Projects\Chevak\GIS\obj\Debug\GIS.pdb

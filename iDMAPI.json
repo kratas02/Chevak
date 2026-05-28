@@ -1,0 +1,541 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "iDM API Test",
+    "description": "Testovací rozhraní pro napojení aplikace EasyiDM",
+    "contact": {
+      "email": "volf@hsicom.cz"
+    },
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://cheapp01.chevak.cz:4430/iDMApiTest/api/"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Uživatelé",
+      "description": "Funkce pro založení uživatele, úpravu práv a odstranění uživatele"
+    }
+  ],
+  "paths": {
+    "/GetAllPerm": {
+      "get": {
+        "summary": "Načtení všech oprávnění",
+        "tags": [
+          "Uživatelé"
+        ],
+        "description": "Načtení všech oprávnění.",
+        "operationId": "GetAllPerm",
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operace úspěšně dokončena",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllPerm"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chybné uživatelské jméno/heslo"
+          }
+        }
+      }
+    },
+    "/GetAllUser": {
+      "get": {
+        "summary": "Načtení všech uživatelů a jejich oprávnění",
+        "tags": [
+          "Uživatelé"
+        ],
+        "description": "Načtení všech uživatelů a jejich oprávnění.",
+        "operationId": "GetAllUser",
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operace úspěšně dokončena",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllUser"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chybné uživatelské jméno/heslo"
+          }
+        }
+      }
+    },
+    "/CreateUser": {
+      "post": {
+        "summary": "Založení nového uživatele",
+        "tags": [
+          "Uživatelé"
+        ],
+        "description": "Založení nového uživatele a nastavení práv.",
+        "operationId": "CreateUser",
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "Založení nového uživatele a nastavení práv.\n\n**Parametry**\n|Název|Popis|Poznámka|\n|-----|-----|--------|\n|userNameBASE64|Název uživatele podle AD|kódováno BASE64 (např. 'test' je 'dGVzdA==')|\n|permissions|Seznam oprávnění|práva oddělená čerkou|\n\n[Online encoder do BASE64 např. zde](https://www.base64encode.org/)\n",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserReq"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK: Uživatel založen.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/CreateUserResp"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Chyba při provádění příkazu",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/CreateUserResp"
+                },
+                "examples": {
+                  "Nevyplněná položka 'userNameBASE64'": {
+                    "value": {
+                      "userID": "1234578-1234-1234-1234-1234567901234",
+                      "result": "Error: Položka 'userNameBASE64' musí být vyplněná."
+                    }
+                  },
+                  "Nevyplněná položka 'permissions'": {
+                    "value": {
+                      "userID": "1234578-1234-1234-1234-1234567901234",
+                      "result": "Error: Položka 'permissions' musí být vyplněná."
+                    }
+                  },
+                  "Uživatel již existuje": {
+                    "value": {
+                      "userID": "1234578-1234-1234-1234-1234567901234",
+                      "result": "Error: Uživatel již existuje."
+                    }
+                  },
+                  "Nespecifikovaná chyba": {
+                    "value": {
+                      "userID": "1234578-1234-1234-1234-1234567901234",
+                      "result": "Error: Chyba při zakládání uživatele."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chybné uživatelské jméno/heslo"
+          }
+        }
+      }
+    },
+    "/UpdateUser": {
+      "put": {
+        "summary": "Aktualizace práv uživatele",
+        "tags": [
+          "Uživatelé"
+        ],
+        "description": "Aktualizace práv uživatele/změna uživatelského jména",
+        "operationId": "UpdateUser",
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "Aktualizace práv uživatele/změna uživatelského jména\n      \n**Parametry**\n|Název|Popis|Poznámka|\n|-----|-----|--------|\n|userID|Jednoznačný identifikátor uživatele|vrací funkce CreateUser|\n|userNameBASE64|Název uživatele podle AD|kódováno BASE64 (např. 'test' je 'dGVzdA==')|\n|permissions|Seznam oprávnění|práva oddělená čerkou|\n\n* Pokud je parametr 'userNameBASE64' vyplněný, přejmenuje daného uživatele (jinak prázdný).\n* Pokud je parametr 'permissions' prázdný, nastaví uživatele jako blokovaný/deaktivovaný (jinak nastaví zadaná práva).\n\n[Online encoder do BASE64 např. zde](https://www.base64encode.org/)\n",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserReq"
+              },
+              "examples": {
+                "Nastavení práv uživatele": {
+                  "value": {
+                    "userID": "1234578-1234-1234-1234-1234567901234",
+                    "userNameBASE64": "",
+                    "permissions": "iGIS_ShowDB,iGIS_ShowRef,EvStan_Login"
+                  }
+                },
+                "Změna uživatelského jména a nastavení práv": {
+                  "value": {
+                    "userID": "1234578-1234-1234-1234-1234567901234",
+                    "userNameBASE64": "nové_uživatelské_jméno_BASE64",
+                    "permissions": "iGIS_ShowDB,iGIS_ShowRef,EvStan_Login"
+                  }
+                },
+                "Blokace/deaktivace uživatelského jména": {
+                  "value": {
+                    "userID": "1234578-1234-1234-1234-1234567901234",
+                    "userNameBASE64": "",
+                    "permissions": ""
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK: Oprávnění nastavena úspěšně.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/UpdateUserResp"
+                },
+                "examples": {
+                  "Oprávnění nastavena úspěšně": {
+                    "value": {
+                      "userID": "1234578-1234-1234-1234-1234567901234",
+                      "result": "OK: Oprávnění nastavena úspěšně."
+                    }
+                  },
+                  "Uživatel nastaven jako zablokovaný/deaktivovaný": {
+                    "value": {
+                      "userID": "1234578-1234-1234-1234-1234567901234",
+                      "result": "OK: Uživatel je nastaven jako zablokovaný/deaktivovaný."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Chyba při provádění příkazu",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/UpdateUserResp"
+                },
+                "examples": {
+                  "Uživatel neexistuje": {
+                    "value": {
+                      "userID": "1234578-1234-1234-1234-1234567901234",
+                      "result": "Error: Uživatel neexistuje."
+                    }
+                  },
+                  "Nespecifikovaná chyba": {
+                    "value": {
+                      "userID": "1234578-1234-1234-1234-1234567901234",
+                      "result": "Error: Chyba při aktualizaci práv."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chybné uživatelské jméno/heslo"
+          }
+        }
+      }
+    },
+    "/GetUserIdPerm/{userID}": {
+      "get": {
+        "summary": "Vrátí seznam oprávnění daného uživatele",
+        "tags": [
+          "Uživatelé"
+        ],
+        "description": "Vrátí seznam oprávnění daného uživatele.",
+        "operationId": "GetUserIdPerm",
+        "parameters": [
+          {
+            "name": "userID",
+            "in": "path",
+            "description": "interní ID uživatele (vrací CreateUser)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operace úspěšně dokončena",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllPerm"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chybné uživatelské jméno/heslo"
+          }
+        }
+      }
+    },
+    "/DeleteUser/{userID}": {
+      "delete": {
+        "summary": "Odstranění uživatele",
+        "tags": [
+          "Uživatelé"
+        ],
+        "description": "Odstranění uživatele.",
+        "operationId": "DeleteUser",
+        "parameters": [
+          {
+            "name": "userID",
+            "in": "path",
+            "description": "interní ID uživatele (vrací CreateUser)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK: Uživatel by úspěšně odstraněn.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/UpdateUserResp"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Chyba při provádění příkazu",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/UpdateUserResp"
+                },
+                "examples": {
+                  "Uživatel neexistuje": {
+                    "value": {
+                      "userID": "1234578-1234-1234-1234-1234567901234",
+                      "result": "Error: Uživatel se zadaným ID nebyl nalezen."
+                    }
+                  },
+                  "Nespecifikovaná chyba": {
+                    "value": {
+                      "userID": "1234578-1234-1234-1234-1234567901234",
+                      "result": "Error: Chyba při odstraňování uživatele."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chybné uživatelské jméno/heslo"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetAllPerm": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "permName": {
+              "type": "string"
+            },
+            "permDesc": {
+              "type": "string"
+            }
+          }
+        },
+        "example": [
+          {
+            "permName": "právo 1",
+            "permDesc": "popis práva 1"
+          },
+          {
+            "permName": "právo 2",
+            "permDesc": "popis práva 2"
+          }
+        ]
+      },
+      "GetAllUser": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "userID": {
+              "type": "string"
+            },
+            "userNameBASE64": {
+              "type": "string"
+            },
+            "permissions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "permName": {
+                    "type": "string"
+                  },
+                  "permDesc": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "example": [
+          {
+            "userID": "Interní ID uživatele - GUID 1",
+            "userNameBASE64": "uživatelské_jméno_BASE64 1",
+            "permissions": [
+              {
+                "permName": "právo 1",
+                "permDesc": "popis práva 1"
+              },
+              {
+                "permName": "právo 2",
+                "permDesc": "popis práva 2"
+              }
+            ]
+          },
+          {
+            "userID": "Interní ID uživatele - GUID 2",
+            "userNameBASE64": "uživatelské_jméno_BASE64 2",
+            "permissions": [
+              {
+                "permName": "právo 1",
+                "permDesc": "popis práva 1"
+              },
+              {
+                "permName": "právo 2",
+                "permDesc": "popis práva 2"
+              },
+              {
+                "permName": "právo 3",
+                "permDesc": "popis práva 3"
+              }
+            ]
+          }
+        ]
+      },
+      "CreateUserReq": {
+        "type": "object",
+        "properties": {
+          "userNameBASE64": {
+            "type": "string",
+            "example": "uživatelské_jméno_BASE64",
+            "description": "Uživatelské jméno podle AD (BASE64)"
+          },
+          "permissions": {
+            "type": "string",
+            "example": "iGIS_ShowDB,iGIS_ShowRef,EvStan_Login",
+            "description": "Seznam oprávnění (oddělovač čárka)"
+          }
+        }
+      },
+      "CreateUserResp": {
+        "type": "object",
+        "properties": {
+          "userID": {
+            "type": "string",
+            "example": "1234578-1234-1234-1234-1234567901234",
+            "description": "Interní ID uživatele - GUID"
+          },
+          "result": {
+            "type": "string",
+            "example": "OK: Uživatel založen.",
+            "description": "Výsledek operace. Vrací 'OK: ...' nebo 'Error: ...'"
+          }
+        }
+      },
+      "UpdateUserReq": {
+        "type": "object",
+        "properties": {
+          "userID": {
+            "type": "string",
+            "example": "uživatelské_ID",
+            "description": "Interní ID uživatele - GUID"
+          },
+          "userNameBASE64": {
+            "type": "string",
+            "example": "uživatelské_jméno_BASE64",
+            "description": "Uživatelské jméno podle AD (vyplněné jen při změně uživatelského jména) (BASE64)"
+          },
+          "permissions": {
+            "type": "string",
+            "example": "iGIS_ShowDB,iGIS_ShowRef,EvStan_Login",
+            "description": "Seznam oprávnění (oddělovač čárka)"
+          }
+        }
+      },
+      "UpdateUserResp": {
+        "type": "object",
+        "properties": {
+          "userID": {
+            "type": "string",
+            "example": "1234578-1234-1234-1234-1234567901234",
+            "description": "Interní ID uživatele - GUID"
+          },
+          "result": {
+            "type": "string",
+            "example": "OK: Oprávnění nastavena úspěšně.",
+            "description": "Výsledek operace. Vrací 'OK: ...' nebo 'Error: ...'"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "basicAuth": {
+        "type": "http",
+        "scheme": "basic"
+      }
+    }
+  },
+  "security": [
+    {
+      "basicAuth": []
+    }
+  ]
+}
