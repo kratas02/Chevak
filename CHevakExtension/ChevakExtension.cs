@@ -1,8 +1,12 @@
 
 using Microsoft.MetadirectoryServices;
 using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Data.SqlClient;
 using System.DirectoryServices;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 
 namespace Mms_Metaverse
@@ -14,6 +18,51 @@ namespace Mms_Metaverse
     {
 
         string ADMA = "chevak.cz";
+
+        // P?ipojovacù ?et?zec se na?ùtù z ChevakExtension.config (vedle DLL v Extensions sloùce)
+        private static string _connectionString;
+        private static readonly object _configLock = new object();
+
+        private static string IDM_CONNECTION_STRING
+        {
+            get
+            {
+                if (_connectionString != null) return _connectionString;
+                lock (_configLock)
+                {
+                    if (_connectionString != null) return _connectionString;
+                    _connectionString = LoadConnectionString();
+                }
+                return _connectionString;
+            }
+        }
+
+        private static string LoadConnectionString()
+        {
+            // Utils.ExtensionsDirectory vrùtù cestu k Extensions sloùce MIM Sync Service
+            string configPath = Path.Combine(
+                Utils.ExtensionsDirectory, "ChevakExtension.config");
+
+            if (!File.Exists(configPath))
+                throw new FileNotFoundException(
+                    "Konfigura?nù soubor nenalezen: " + configPath);
+
+            ExeConfigurationFileMap configMap = new ExeConfigurationFileMap();
+            configMap.ExeConfigFilename = configPath;
+
+            Configuration config = ConfigurationManager.OpenMappedExeConfiguration(
+                configMap, ConfigurationUserLevel.None);
+
+            ConnectionStringSettings cs =
+                config.ConnectionStrings.ConnectionStrings["IDMDatabase"];
+
+            if (cs == null)
+                throw new InvalidOperationException(
+                    "Connection string 'IDMDatabase' nebyl nalezen v " + configPath);
+
+            return cs.ConnectionString;
+        }
+
         public MVExtensionObject()
         {
             //
@@ -21,18 +70,74 @@ namespace Mms_Metaverse
             //
         }
 
+        // Sdùlenù SQL p?ipojenù ù otev?eno v Initialize, zav?eno v Terminate
+        // Pouùitù: GetGISPermissions si vyùùdù p?ipojenù p?es EnsureConnection()
+        private static SqlConnection _sqlConnection;
+        private static readonly object _sqlLock = new object();
+
         void IMVSynchronization.Initialize()
         {
-            //
-            // TODO: Add initialization logic here
-            //
+            OpenSqlConnection();
         }
 
         void IMVSynchronization.Terminate()
         {
-            //
-            // TODO: Add termination logic here
-            //
+            CloseSqlConnection();
+        }
+
+        /// <summary>
+        /// Otev?e sdÌlenÈ SQL p?ipojenÌ. Vol· se z Initialize() jak MVExtension, tak MAExtension.
+        /// </summary>
+        public static void OpenSqlConnection()
+        {
+            lock (_sqlLock)
+            {
+                if (_sqlConnection == null)
+                    _sqlConnection = new SqlConnection(IDM_CONNECTION_STRING);
+
+                if (_sqlConnection.State != System.Data.ConnectionState.Open)
+                    _sqlConnection.Open();
+            }
+        }
+
+        /// <summary>
+        /// Zav?e a uvolnÌ sdÌlenÈ SQL p?ipojenÌ. Vol· se z Terminate() jak MVExtension, tak MAExtension.
+        /// </summary>
+        public static void CloseSqlConnection()
+        {
+            lock (_sqlLock)
+            {
+                if (_sqlConnection != null)
+                {
+                    try { _sqlConnection.Close(); }
+                    catch { }
+                    _sqlConnection.Dispose();
+                    _sqlConnection = null;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Vrùtù platnù otev?enù SQL p?ipojenù.
+        /// Pokud spojenù vypadlo (timeout, reset sùt?), automaticky se znovu p?ipojù.
+        /// </summary>
+        private static SqlConnection EnsureConnection()
+        {
+            lock (_sqlLock)
+            {
+                if (_sqlConnection == null)
+                    _sqlConnection = new SqlConnection(IDM_CONNECTION_STRING);
+
+                if (_sqlConnection.State == System.Data.ConnectionState.Open)
+                    return _sqlConnection;
+
+                // Spojenù je zav?enù nebo p?eruùenù ù znovu otev?eme
+                if (_sqlConnection.State != System.Data.ConnectionState.Closed)
+                    _sqlConnection.Close();
+
+                _sqlConnection.Open();
+                return _sqlConnection;
+            }
         }
 
         void IMVSynchronization.Provision(MVEntry mventry)
@@ -45,6 +150,9 @@ namespace Mms_Metaverse
             {
                 createADUser(mventry);
                 createEasyIDM(mventry);
+                createGISUser(mventry);
+
+                //if (mventry["add,userName,string,,ch\\ch"])
             }
             if (mventry.ObjectType == "application-role")
             {
@@ -187,6 +295,45 @@ namespace Mms_Metaverse
                 // csEntry["iDMObjectTypeId"].Value = "4";
                 csEntry.CommitNewConnector();
             }
+            else if (EIDMMA.Connectors.Count == 0 && mventry["DisplayName"].IsPresent && mventry["applicationCode"].IsPresent && mventry["applicationCode"].StringValue == "GIS" && mventry["applicationModuleCode"].IsPresent)
+            {
+                CSEntry csEntry = EIDMMA.Connectors.StartNewConnector("ApplicationRole");
+                //csEntry["domain"].StringValue = "chevak";
+                string strGUID = Guid.NewGuid().ToString().ToUpper();
+                csEntry.DN = EIDMMA.CreateDN(strGUID);
+                csEntry["idmObjectId"].StringValue = strGUID;
+                csEntry["name"].StringValue = mventry["DisplayName"].StringValue;
+                csEntry["externalRoleCode"].StringValue = mventry["DisplayName"].StringValue;
+                csEntry["groupDomain"].StringValue = "600";
+                csEntry["groupStatus"].StringValue = "22";
+                csEntry["groupType"].StringValue = "19";
+                csEntry["isActive"].BooleanValue = true;
+                csEntry["owners"].Values.Add("3C969ECA-C12F-4DBC-8489-46CEB41D3FD7");
+                csEntry["environment"].StringValue = "602";
+                //csEntry["nestingRule"].StringValue = "{\"and\":[{\"workplaceCode\":{\"eq\":\"" + mventry["workPositionCode"].StringValue + "\"}}]}";
+                //csEntry["nestingDirection"].StringValue = "51";
+                csEntry["techname"].StringValue = mventry["DisplayName"].StringValue;
+
+
+                if (mventry["applicationModuleCode"].StringValue.ToLower() == "evstan")
+                {
+                    csEntry["application"].StringValue = "d9af8745-16b7-4d8b-a0d5-bf3f91e566bc";
+
+                }
+                else if (mventry["applicationModuleCode"].StringValue.ToLower() == "igis")
+                {
+                    csEntry["application"].StringValue = "5fa9e222-0d46-4b1b-bb42-c9cac2f0e8b7";
+
+                }
+                else if (mventry["applicationModuleCode"].StringValue.ToLower() == "ivis")
+                {
+                    csEntry["application"].StringValue = "40c75f91-e718-4dc8-b9a5-0ddaacc98422";
+                }
+
+                //add,externalRoleCode,string,,002
+                // csEntry["iDMObjectTypeId"].Value = "4";
+                csEntry.CommitNewConnector();
+            }
         }
         private void createEasyIDMBusGroup(MVEntry mventry)
         {
@@ -221,8 +368,8 @@ namespace Mms_Metaverse
 
                 csEntry["AppRole"].ReferenceValue = roleRef;
                 */
-                //csEntry["AutoCastRule"].StringValue = "{ \"and\":[{ \"computedAccountStatus\":{ \"eq\":\"AktivnÌ\"} }]}";
-                csEntry["AutoCastRule"].StringValue = "{\"and\":[{\"workPositionCode\":{\"eq\":\"" + mventry["workPositionCode"].StringValue + "\"}},{\"computedAccountStatus\":{\"neq\":\"Zruöen˝\"}}]}";
+                //csEntry["AutoCastRule"].StringValue = "{ \"and\":[{ \"computedAccountStatus\":{ \"eq\":\"Aktivnù\"} }]}";
+                csEntry["AutoCastRule"].StringValue = "{\"and\":[{\"workPositionCode\":{\"eq\":\"" + mventry["workPositionCode"].StringValue + "\"}},{\"computedAccountStatus\":{\"neq\":\"Zruùenù\"}}]}";
 
                 //                    add,castType,string,,41
                 //                csEntry["environment"].StringValue = "602";
@@ -231,6 +378,95 @@ namespace Mms_Metaverse
                 // csEntry["iDMObjectTypeId"].Value = "4";
                 csEntry.CommitNewConnector();
             }
+        }
+
+        private void createGISUser(MVEntry mventry)
+        {
+            ConnectedMA GISMA = mventry.ConnectedMAs["GIS"];
+            if (GISMA.Connectors.Count == 0 && mventry["AccountName"].IsPresent && mventry["gisEnabled"].IsPresent && mventry["gisEnabled"].BooleanValue)
+            {
+                string username    = mventry["AccountName"].StringValue.Trim();
+                string permissions = GetGISPermissions(username);
+
+                // Bez oprùvn?nù uùivatele nevytvù?ùme ù API by vrùtilo chybu
+                if (string.IsNullOrEmpty(permissions)) return;
+
+                CSEntry csEntry = GISMA.Connectors.StartNewConnector("User");
+                csEntry["userName"].StringValue    = username;
+                csEntry["permissions"].StringValue = permissions;
+                csEntry.CommitNewConnector();
+            }
+        }
+
+        /// <summary>
+        /// Vrùtù seznam rolù pro danùho uùivatele (i.TechName) z iDM databùze
+        /// jako ?ùrkami odd?lenù ?et?zec permName hodnot pro GIS aplikaci.
+        /// Vrùtù prùzdnù ?et?zec pokud uùivatel nemù ùùdnù GIS oprùvn?nù.
+        /// </summary>
+        public static string GetGISPermissions(string username)
+        {
+            if (string.IsNullOrEmpty(username)) return string.Empty;
+
+            const string sql = @"
+                SELECT r.TechName AS rolename
+                FROM dbo.IDMObjects AS r
+                FULL OUTER JOIN dbo.IDMObjects AS i
+                    INNER JOIN dbo.IDMObjectReadStore
+                        ON i.IDMObjectId = dbo.IDMObjectReadStore.IdmObjectId
+                    FULL OUTER JOIN
+                        (SELECT IDMObjectId, applicationCode
+                         FROM (
+                             SELECT i.IDMObjectId,
+                                    JSON_VALUE(rsApp.JsonData, '$.applicationCodeAP') AS applicationCode
+                             FROM dbo.IDMObjects AS i
+                             LEFT OUTER JOIN dbo.IDMObjectReadStore AS rs
+                                 ON i.IDMObjectId = rs.IdmObjectId
+                             LEFT OUTER JOIN dbo.RoleAccesses AS ra
+                                 ON ra.ApplicationRoleId = i.IDMObjectId
+                             LEFT OUTER JOIN dbo.IDMObjectReadStore AS rsApp
+                                 ON ra.ResourceId = rsApp.IdmObjectId
+                             WHERE i.IDMObjectTypeId = 6
+                         ) AS x
+                        ) AS y
+                    RIGHT OUTER JOIN dbo.Casts AS c
+                        ON y.IDMObjectId = c.RoleId
+                    ON c.IdentityId = i.IDMObjectId
+                ON r.IDMObjectId = c.RoleId
+                WHERE y.applicationCode = 'GIS'
+                  AND c.IsArchived  = 0
+                  AND c.IsValid     = 1
+                  AND LEN(r.TechName) < 30
+                  AND LEN(i.TechName) < 30
+                  AND (c.ValidTo > GETDATE() OR c.ValidTo IS NULL)
+                  AND i.TechName = @username";
+
+            List<string> roles = new List<string>();
+
+            try
+            {
+                SqlConnection conn = EnsureConnection();
+                using (SqlCommand cmd = new SqlCommand(sql, conn))
+                {
+                    cmd.Parameters.Add(new SqlParameter("@username", username));
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            string roleName = reader["rolename"] as string;
+                            if (!string.IsNullOrEmpty(roleName))
+                                roles.Add(roleName.Trim());
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                File.AppendAllText(@"C:\Temp\GIS_log.txt",
+                    DateTime.Now + " GetGISPermissions ERROR [" + username + "]: "
+                    + ex.Message + Environment.NewLine);
+            }
+
+            return string.Join(",", roles.ToArray());
         }
 
         private void createEasyIDM(MVEntry mventry)
@@ -281,6 +517,7 @@ namespace Mms_Metaverse
 
             return null;
         }
+
         public static bool isSamInAD(string sam)
         {
             DirectoryEntry rootDSE = new DirectoryEntry("LDAP://RootDSE");

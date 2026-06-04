@@ -21,16 +21,15 @@ namespace Mms_ManagementAgent_MVASOLExtension
         }
         void IMASynchronization.Initialize()
         {
-            //
-            // TODO: write initialization code
-            //
+            // Otevřeme SQL připojení pro případ, že běží pouze export bez provisioning kroku
+            // (MVExtension.Initialize nemusí být voláno při standalone Export run stepu)
+            Mms_Metaverse.MVExtensionObject.OpenSqlConnection();
         }
 
         void IMASynchronization.Terminate()
         {
-            //
-            // TODO: write termination code
-            //
+            // Zavřeme SQL připojení – platí pro oba případy (s i bez provisioning kroku)
+            Mms_Metaverse.MVExtensionObject.CloseSqlConnection();
         }
 
         bool IMASynchronization.ShouldProjectToMV(CSEntry csentry, out string MVObjectType)
@@ -78,6 +77,37 @@ namespace Mms_ManagementAgent_MVASOLExtension
 
             switch (FlowRuleName)
             {
+                case "cd.Group:permName->mv.application-role:applicationModuleCode":
+                    if (csentry["permName"].StringValue.ToLower().StartsWith("evstan"))
+                    {
+                        mventry["applicationModuleCode"].StringValue = "EvStan";
+                    }
+                    else if (csentry["permName"].StringValue.ToLower().StartsWith("igis"))
+                    {
+                        mventry["applicationModuleCode"].StringValue = "iGIS";
+
+                    }
+                    else if (csentry["permName"].StringValue.ToLower().StartsWith("ivis"))
+                    {
+                        mventry["applicationModuleCode"].StringValue = "iVIS";
+                    }
+
+            break;
+                case "cd.Group:permName->mv.application-role:displayName":
+                    if (csentry["permName"].StringValue.ToLower().StartsWith("evstan"))
+                    {
+                        mventry["displayName"].StringValue = csentry["permName"].StringValue.Substring(csentry["permName"].StringValue.IndexOf('_')+1);
+                    }
+                    else if (csentry["permName"].StringValue.ToLower().StartsWith("igis"))
+                    {
+                        mventry["displayName"].StringValue = csentry["permName"].StringValue.Substring(csentry["permName"].StringValue.IndexOf('_') + 1);
+
+                    }
+                    else if (csentry["permName"].StringValue.ToLower().StartsWith("ivis"))
+                    {
+                        mventry["displayName"].StringValue = csentry["permName"].StringValue.Substring(csentry["permName"].StringValue.IndexOf('_') + 1);
+                    }
+                    break;
                 case "cd.Identity:accountStatusToAD->mv.person:isEnabled":
                     //mventry["isEnabled"].BooleanValue = !Convert.ToBoolean(csentry["accountStatusToAD"].IntegerValue & 0x0002);
 
@@ -115,7 +145,7 @@ namespace Mms_ManagementAgent_MVASOLExtension
                     {
                         string[] items = mventry["validFrom"].StringValue.Split('.');
                         if (items.Length == 3)
-                            csentry["validFrom"].StringValue = $"{items[2]}-{items[1]}-{items[0]}T00:00:00";
+                            csentry["validFrom"].StringValue = items[2] + "-" + items[1] + "-" + items[0] + "T00:00:00";
                     }
                     else
                     {
@@ -128,11 +158,22 @@ namespace Mms_ManagementAgent_MVASOLExtension
                     {
                         string[] items = mventry["validTo"].StringValue.Split('.');
                         if (items.Length == 3)
-                            csentry["validTo"].StringValue = $"{items[2]}-{items[1]}-{items[0]}T00:00:00";
+                            csentry["validTo"].StringValue = items[2] + "-" + items[1] + "-" + items[0] + "T00:00:00";
                     }
                     else
                     {
-                        csentry["validTo"].Delete();
+                        if (mventry["hrIdentity"].IsPresent && mventry["hrIdentity"].BooleanValue && mventry["hrIdentity"].LastContributingMA.Name == "EIDMMA")
+                        {
+                            if (!csentry["validTo"].IsPresent)
+                            {
+                                csentry["validTo"].StringValue = DateTime.Now.AddDays(-1).ToString("yyyy-MM-ddT00:00:00");
+                            }
+                        }
+                        else
+                        {
+                            csentry["validTo"].Delete();
+                        }
+                        
                     }
 
                     break;
@@ -141,7 +182,7 @@ namespace Mms_ManagementAgent_MVASOLExtension
                     {
                         string[] items = mventry["inFrom"].StringValue.Split('.');
                         if (items.Length == 3)
-                            csentry["inFrom"].StringValue = $"{items[2]}-{items[1]}-{items[0]}T00:00:00";
+                            csentry["inFrom"].StringValue = items[2] + "-" + items[1] + "-" + items[0] + "T00:00:00";
                     }
                     else
                     {
@@ -154,7 +195,7 @@ namespace Mms_ManagementAgent_MVASOLExtension
                     {
                         string[] items = mventry["outFrom"].StringValue.Split('.');
                         if (items.Length == 3)
-                            csentry["outFrom"].StringValue = $"{items[2]}-{items[1]}-{items[0]}T00:00:00";
+                            csentry["outFrom"].StringValue = items[2] + "-" + items[1] + "-" + items[0] + "T00:00:00";
                     }
                     else
                     {
@@ -167,7 +208,7 @@ namespace Mms_ManagementAgent_MVASOLExtension
                     {
                         string[] items = mventry["validZFrom"].StringValue.Split('.');
                         if (items.Length == 3)
-                            csentry["validZFrom"].StringValue = $"{items[2]}-{items[1]}-{items[0]}T00:00:00";
+                            csentry["validZFrom"].StringValue = items[2] + "-" + items[1] + "-" + items[0] + "T00:00:00";
                     }
                     else
                     {
@@ -180,7 +221,7 @@ namespace Mms_ManagementAgent_MVASOLExtension
                     {
                         string[] items = mventry["validZTo"].StringValue.Split('.');
                         if (items.Length == 3)
-                            csentry["validZTo"].StringValue = $"{items[2]}-{items[1]}-{items[0]}T00:00:00";
+                            csentry["validZTo"].StringValue = items[2] + "-" + items[1] + "-" + items[0] + "T00:00:00";
                     }
                     else
                     {
@@ -258,6 +299,31 @@ namespace Mms_ManagementAgent_MVASOLExtension
                     else
                     {
                         csentry["techName"].Delete();
+                    }
+                    break;
+
+                // ----------------------------------------------------------------
+                // GIS: aktualizace oprávnění při změně záznamu (trigger: DateChanged)
+                // Pravidlo nastavte v GIS MA jako:
+                //   FlowRuleName = "cd.User:permissions<-mv.person:DateChanged"
+                //   Source attribute: DateChanged (nebo libovolný trigger atribut)
+                //   Destination attribute: permissions
+                // ----------------------------------------------------------------
+                case "cd.User:permissions<-mv.person:DateChanged":
+                    if (!mventry["AccountName"].IsPresent) break;
+
+                    string gisUser  = mventry["AccountName"].StringValue.Trim();
+                    string gisPerm  = Mms_Metaverse.MVExtensionObject.GetGISPermissions(gisUser);
+
+                    if (!string.IsNullOrEmpty(gisPerm))
+                    {
+                        // Nastavíme aktuální oprávnění – GIS API nahradí celý seznam
+                        csentry["permissions"].StringValue = gisPerm;
+                    }
+                    else
+                    {
+                        // Žádná oprávnění v iDM → prázdný řetězec = GIS API uživatele zablokuje
+                        csentry["permissions"].StringValue = string.Empty;
                     }
                     break;
 

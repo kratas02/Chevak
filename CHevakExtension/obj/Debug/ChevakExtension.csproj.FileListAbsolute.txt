@@ -4,3 +4,7 @@ C:\Projects\CHevakExtension\obj\Debug\ChevakExtension.csproj.AssemblyReference.c
 C:\Projects\CHevakExtension\obj\Debug\ChevakExtension.csproj.CoreCompileInputs.cache
 C:\Projects\CHevakExtension\obj\Debug\ChevakExtension.dll
 C:\Projects\CHevakExtension\obj\Debug\ChevakExtension.pdb
+C:\Projects\Chevak\CHevakExtension\obj\Debug\ChevakExtension.csprojResolveAssemblyReference.cache
+C:\Projects\Chevak\CHevakExtension\obj\Debug\ChevakExtension.dll
+C:\Projects\Chevak\CHevakExtension\obj\Debug\ChevakExtension.pdb
+C:\Program Files\Microsoft Forefront Identity Manager\2010\Synchronization Service\Extensions\ChevakExtension.config
